@@ -1,136 +1,235 @@
 "use client";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
-import Link from "next/link";
-
-const footerLinks = {
-  Brands: [
-    { label: "Coca-Cola", href: "/brands#coca-cola" },
-    { label: "Fanta", href: "/brands#fanta" },
-    { label: "Sprite", href: "/brands#sprite" },
-    { label: "Schweppes", href: "/brands#schweppes" },
-  ],
-  Company: [
-    { label: "About Us", href: "/about" },
-    { label: "Leadership", href: "/about#leadership" },
-    { label: "History", href: "/about#history" },
-    { label: "Careers", href: "/about#careers" },
-  ],
-  Impact: [
-    { label: "Sustainability", href: "/impact" },
-    { label: "Community", href: "/impact#community" },
-    { label: "Environment", href: "/impact#environment" },
-    { label: "Reports", href: "/impact#reports" },
-  ],
-  Connect: [
-    { label: "Campaigns", href: "/campaigns" },
-    { label: "Press", href: "/about#press" },
-    { label: "Contact", href: "/about#contact" },
-    { label: "Investors", href: "/about#investors" },
-  ],
+const scroll = (href: string) => {
+  const el = document.getElementById(href.replace("#", ""));
+  if (el) el.scrollIntoView({ behavior: "smooth" });
 };
 
 export default function Footer() {
   return (
     <footer
-      className="relative pt-24 pb-12 overflow-hidden"
-      style={{ background: "#050505", borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      style={{
+        background: "#0A0A0A",
+        position: "relative",
+        overflow: "hidden",
+      }}
     >
-      {/* Background text */}
+      {/* ── Giant COCA-COLA — the hero of the footer ── */}
       <div
-        className="absolute bottom-0 left-0 right-0 text-center text-[20vw] font-black leading-none text-white/[0.02] pointer-events-none select-none overflow-hidden"
-        style={{ fontFamily: "var(--font-display)" }}
+        style={{
+          position: "relative",
+          paddingTop: "clamp(60px,10vh,100px)",
+          overflow: "hidden",
+        }}
       >
-        COKE
+        {/* Red horizontal rule */}
+        <div style={{
+          position: "absolute",
+          top: 0, left: 0, right: 0,
+          height: "2px",
+          background: "linear-gradient(to right, #E8001A 0%, #E8001A 60%, transparent 100%)",
+        }} />
+
+        <motion.div
+          initial={{ opacity: 0, y: 80 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1.1, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(5.5rem,17vw,20rem)",
+            fontWeight: 900,
+            color: "transparent",
+            WebkitTextStroke: "1.5px rgba(255,255,255,0.12)",
+            letterSpacing: "-0.04em",
+            lineHeight: 0.82,
+            textAlign: "center",
+            userSelect: "none",
+            pointerEvents: "none",
+          }}
+        >
+          COCA-COLA
+        </motion.div>
+
+        {/* Red slash through the type */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          whileInView={{ scaleX: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          style={{
+            position: "absolute",
+            top: "55%",
+            left: 0, right: 0,
+            height: "3px",
+            background: "#E8001A",
+            transformOrigin: "left",
+            pointerEvents: "none",
+          }}
+        />
       </div>
 
-      <div className="max-w-[1600px] mx-auto px-8 lg:px-16 relative z-10">
-        {/* Top section */}
-        <div className="grid lg:grid-cols-5 gap-16 mb-20">
-          {/* Brand */}
-          <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-6">
-              <div
-                className="w-12 h-12 rounded-full flex items-center justify-center"
-                style={{ background: "#F40009" }}
-              >
-                <svg viewBox="0 0 40 40" className="w-8 h-8" fill="white">
-                  <circle cx="20" cy="20" r="14" fill="none" stroke="white" strokeWidth="2" />
-                  <path d="M14 16c0 0 2 1 6 1s6-1 6-1v2s-2 1-6 1-6-1-6-1v-2zm0 4c0 0 2 1 6 1s6-1 6-1v2s-2 1-6 1-6-1-6-1v-2z" />
-                </svg>
-              </div>
-              <div>
-                <div
-                  className="text-white font-black text-lg leading-none"
-                  style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}
-                >
-                  COCA-COLA
-                </div>
-                <div className="text-[#F40009] text-xs tracking-widest uppercase">Nigeria</div>
-              </div>
-            </div>
-            <p className="text-white/30 text-sm leading-relaxed max-w-xs mb-8">
-              Refreshing Nigeria since 1953. More than a beverage — a cultural institution,
-              a moment of joy, a shared experience.
-            </p>
-            {/* Social links */}
-            <div className="flex items-center gap-4">
-              {["Instagram", "Twitter", "Facebook", "YouTube"].map((social) => (
-                <a
-                  key={social}
-                  href="#"
-                  className="w-10 h-10 rounded-full flex items-center justify-center text-white/30 hover:text-white transition-all duration-300 hover:scale-110"
-                  style={{ border: "1px solid rgba(255,255,255,0.08)" }}
-                  aria-label={social}
-                >
-                  <span className="text-xs font-bold">{social[0]}</span>
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Links */}
-          {Object.entries(footerLinks).map(([category, links]) => (
-            <div key={category}>
-              <h4 className="text-white/20 text-xs font-semibold tracking-[0.3em] uppercase mb-6">
-                {category}
-              </h4>
-              <ul className="space-y-3">
-                {links.map((link) => (
-                  <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-white/40 text-sm hover:text-white transition-colors duration-300 hover:translate-x-1 inline-block"
-                    >
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-
-        {/* Bottom bar */}
-        <div
-          className="flex items-center justify-between flex-wrap gap-4 pt-8"
-          style={{ borderTop: "1px solid rgba(255,255,255,0.06)" }}
+      {/* ── Content row ── */}
+      <div
+        style={{
+          maxWidth: "1440px",
+          margin: "0 auto",
+          padding: "clamp(32px,5vh,56px) clamp(40px,8vw,120px) clamp(28px,4vh,44px)",
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
+          alignItems: "center",
+          gap: "clamp(24px,4vw,48px)",
+          borderTop: "1px solid rgba(255,255,255,0.07)",
+          position: "relative",
+          zIndex: 1,
+        }}
+      >
+        {/* Left — logo + tagline */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
         >
-          <p className="text-white/20 text-xs">
-            © 2024 The Coca-Cola Company. All rights reserved.
+          <Image
+            src="/media/images/logo.png"
+            alt="Coca-Cola"
+            width={80}
+            height={32}
+            style={{ objectFit: "contain", height: "auto", filter: "brightness(0) invert(1)", marginBottom: "12px" }}
+          />
+          <p style={{
+            color: "rgba(255,255,255,0.3)",
+            fontSize: "12px",
+            lineHeight: 1.7,
+            maxWidth: "220px",
+          }}>
+            Refreshing Nigeria since 1953.
           </p>
-          <div className="flex items-center gap-6">
-            {["Privacy Policy", "Terms of Use", "Cookie Settings"].map((item) => (
-              <a
-                key={item}
-                href="#"
-                className="text-white/20 text-xs hover:text-white/50 transition-colors duration-300"
+        </motion.div>
+
+        {/* Center — nav links */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.1 }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: "16px",
+          }}
+        >
+          <div style={{ display: "flex", gap: "clamp(16px,3vw,40px)", flexWrap: "wrap", justifyContent: "center" }}>
+            {[
+              ["Brands", "#brands"],
+              ["Campaigns", "#campaigns"],
+              ["Impact", "#impact"],
+              ["About", "#about"],
+            ].map(([label, href]) => (
+              <motion.a
+                key={label}
+                href={href}
+                onClick={e => { e.preventDefault(); scroll(href); }}
+                whileHover={{ color: "#E8001A" }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  color: "rgba(255,255,255,0.45)",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                  letterSpacing: "0.2em",
+                  textTransform: "uppercase",
+                  textDecoration: "none",
+                }}
               >
-                {item}
-              </a>
+                {label}
+              </motion.a>
             ))}
           </div>
-        </div>
+
+          <p style={{
+            color: "rgba(255,255,255,0.18)",
+            fontSize: "10px",
+            letterSpacing: "0.05em",
+          }}>
+            © 2024 The Coca-Cola Company. All rights reserved.
+          </p>
+        </motion.div>
+
+        {/* Right — socials + back to top */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.15 }}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "flex-end",
+            gap: "16px",
+          }}
+        >
+          {/* Social icons */}
+          <div style={{ display: "flex", gap: "8px" }}>
+            {["IG", "TW", "FB", "YT"].map(s => (
+              <motion.a
+                key={s}
+                href="#"
+                whileHover={{ background: "#E8001A", borderColor: "#E8001A", color: "#ffffff" }}
+                transition={{ duration: 0.2 }}
+                style={{
+                  width: "34px", height: "34px",
+                  borderRadius: "50%",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "9px", fontWeight: 700,
+                  color: "rgba(255,255,255,0.4)",
+                  textDecoration: "none",
+                }}
+              >
+                {s}
+              </motion.a>
+            ))}
+          </div>
+
+          {/* Back to top */}
+          <motion.button
+            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            whileHover={{ color: "#E8001A" }}
+            whileTap={{ scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              display: "flex", alignItems: "center", gap: "6px",
+              background: "none", border: "none",
+              color: "rgba(255,255,255,0.3)",
+              fontSize: "10px", fontWeight: 700,
+              letterSpacing: "0.2em", textTransform: "uppercase",
+              cursor: "pointer",
+            }}
+          >
+            Back to top
+            <svg width="10" height="10" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" />
+            </svg>
+          </motion.button>
+        </motion.div>
       </div>
+
+      {/* Mobile */}
+      <style>{`
+        @media (max-width: 768px) {
+          footer > div:last-child {
+            grid-template-columns: 1fr !important;
+            text-align: center;
+          }
+          footer > div:last-child > div:last-child {
+            align-items: center !important;
+          }
+        }
+      `}</style>
     </footer>
   );
 }

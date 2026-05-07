@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
@@ -82,7 +81,7 @@ export default function ImpactTeaser() {
     <section
       ref={sectionRef}
       className="relative py-32 overflow-hidden"
-      style={{ background: "#0A0A0A" }}
+      style={{ background: "#F5F5F0" }}
     >
       {/* Top border */}
       <div
@@ -101,19 +100,19 @@ export default function ImpactTeaser() {
               </span>
             </div>
             <h2
-              className="text-[clamp(3rem,5vw,5rem)] font-black leading-none text-white mb-8"
+              className="text-[clamp(3rem,5vw,5rem)] font-black leading-none text-coke-black mb-8"
               style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.04em" }}
             >
               Better Business.
               <br />
               <span className="text-gradient-red">Better World.</span>
             </h2>
-            <p className="text-white/40 text-base leading-relaxed mb-10 max-w-md">
+            <p className="text-coke-black/40 text-base leading-relaxed mb-10 max-w-md">
               Our commitment to Nigeria goes beyond refreshment. We invest in communities,
               protect the environment, and build a sustainable future for generations to come.
             </p>
-            <Link
-              href="/impact"
+            <a
+              href="#impact"
               className="inline-flex items-center gap-3 px-8 py-4 text-sm font-bold tracking-widest uppercase transition-all duration-500 hover:scale-105 group"
               style={{ border: "1px solid rgba(244,0,9,0.4)", color: "#F40009" }}
             >
@@ -127,7 +126,7 @@ export default function ImpactTeaser() {
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
-            </Link>
+            </a>
           </div>
 
           {/* Right: Stats */}
@@ -142,7 +141,7 @@ export default function ImpactTeaser() {
                 }}
               >
                 <div
-                  className="text-[clamp(2rem,4vw,3.5rem)] font-black leading-none text-white mb-2"
+                  className="text-[clamp(2rem,4vw,3.5rem)] font-black leading-none text-coke-black mb-2"
                   style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.03em" }}
                 >
                   <AnimatedCounter target={stat.value} suffix={stat.suffix} />
@@ -150,7 +149,7 @@ export default function ImpactTeaser() {
                 <div className="text-[#F40009] text-xs font-semibold tracking-widest uppercase mb-2">
                   {stat.label}
                 </div>
-                <div className="text-white/30 text-xs leading-relaxed">
+                <div className="text-coke-black/30 text-xs leading-relaxed">
                   {stat.description}
                 </div>
 

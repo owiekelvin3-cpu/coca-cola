@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+// @ts-ignore — package renamed but still works
 import Lenis from "@studio-freight/lenis";
 
 interface SmoothScrollProviderProps {

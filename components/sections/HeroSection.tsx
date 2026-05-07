@@ -1,271 +1,280 @@
 "use client";
-
-import { useEffect, useRef, Suspense } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Link from "next/link";
 
-const HeroScene = dynamic(() => import("@/components/three/HeroScene"), {
-  ssr: false,
-  loading: () => (
-    <div className="w-full h-full flex items-center justify-center">
-      <div className="w-2 h-2 rounded-full bg-[#F40009] animate-ping" />
-    </div>
-  ),
-});
+const SketchfabEmbed = dynamic(() => import("@/components/three/SketchfabEmbed"), { ssr: false });
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
+if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
+
+const PAGES = [
+  { num: 1, script: "taste the", word1: "Fee",  word2: "ling",  model: "3e2d38a14d4345608a95843b73d869b6" },
+  { num: 2, script: "open",      word1: "Hap",  word2: "piness",model: "34075fedb0ef40d9a172231134849914" },
+  { num: 3, script: "taste the", word1: "Fee",  word2: "ling",  model: "3e2d38a14d4345608a95843b73d869b6" },
+  { num: 4, script: "real",      word1: "Ma",   word2: "gic",   model: "30178d8ee92949499854f6edaac8574f" },
+];
 
 export default function HeroSection() {
-  const sectionRef = useRef<HTMLElement>(null);
-  const headlineRef = useRef<HTMLDivElement>(null);
-  const subRef = useRef<HTMLParagraphElement>(null);
-  const ctaRef = useRef<HTMLDivElement>(null);
-  const scrollIndicatorRef = useRef<HTMLDivElement>(null);
-  const bgRef = useRef<HTMLDivElement>(null);
+  const secRef     = useRef<HTMLElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const canRef     = useRef<HTMLDivElement>(null);
+  const [page, setPage] = useState(2);
+  const [switching, setSwitching] = useState(false);
+
+  const p = PAGES[page];
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Initial entrance animation
-      const tl = gsap.timeline({ delay: 0.8 });
+      // Don't touch canRef opacity via gsap.set — the iframe needs to be visible
+      // to load. Only animate text elements initially hidden.
+      gsap.set([".hw1", ".hw2", ".h-script", ".h-bottom"], { opacity: 0 });
 
-      tl.fromTo(
-        ".hero-line",
-        { y: "110%", opacity: 0 },
-        {
-          y: "0%",
-          opacity: 1,
-          duration: 1.2,
-          stagger: 0.15,
-          ease: "expo.out",
-        }
-      )
-        .fromTo(
-          subRef.current,
-          { y: 30, opacity: 0 },
-          { y: 0, opacity: 1, duration: 1, ease: "expo.out" },
-          "-=0.6"
-        )
-        .fromTo(
-          ctaRef.current,
-          { y: 20, opacity: 0 },
-          { y: 0, opacity: 1, duration: 0.8, ease: "expo.out" },
-          "-=0.5"
-        )
-        .fromTo(
-          scrollIndicatorRef.current,
-          { opacity: 0 },
-          { opacity: 1, duration: 1 },
-          "-=0.3"
-        );
+      const tl = gsap.timeline({ delay: 0.3 });
 
-      // Parallax on scroll
-      if (sectionRef.current) {
-        gsap.to(headlineRef.current, {
-          y: -120,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top top",
-            end: "bottom top",
-            scrub: 1,
-          },
-        });
+      tl.to(overlayRef.current, { opacity: 0, duration: 1.0, ease: "power2.out" });
+      tl.to(".hw1",      { x: "0%", opacity: 1, duration: 1.1, ease: "expo.out" }, 0.4);
+      tl.to(".hw2",      { x: "0%", opacity: 1, duration: 1.1, ease: "expo.out" }, 0.4);
+      tl.to(".h-script", { y: 0,    opacity: 1, duration: 0.8, ease: "expo.out" }, 0.5);
+      tl.to(".h-bottom", { y: 0,    opacity: 1, duration: 0.7, stagger: 0.08, ease: "expo.out" }, 0.9);
 
-        gsap.to(bgRef.current, {
-          scale: 1.15,
-          ease: "none",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top top",
-            end: "bottom top",
-            scrub: 1.5,
-          },
-        });
-      }
-    }, sectionRef);
+      // Scroll-driven 3D interaction
+      const scrollTl = gsap.timeline({
+        scrollTrigger: {
+          trigger: secRef.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: 1.2,
+        },
+      });
 
+      scrollTl
+        .to(canRef.current, { rotate: -22, scale: 1.18, y: -30, x: 60, ease: "none" }, 0)
+        .to(canRef.current, { rotate: -5, scale: 0.85, y: -80, x: 120, opacity: 0.3, ease: "none" }, 0.4);
+
+      gsap.to(".hero-text-layer", {
+        y: -50, opacity: 0.1, ease: "none",
+        scrollTrigger: {
+          trigger: secRef.current,
+          start: "top top", end: "55% top", scrub: 1,
+        },
+      });
+    }, secRef);
     return () => ctx.revert();
   }, []);
 
+  const switchPage = (n: number) => {
+    if (switching || n === page) return;
+    setSwitching(true);
+    gsap.to([".hw1", ".hw2", ".h-script"], {
+      opacity: 0, y: -20, duration: 0.25, ease: "power2.in",
+      onComplete: () => {
+        setPage(n);
+        gsap.fromTo([".hw1", ".hw2", ".h-script"],
+          { opacity: 0, y: 20 },
+          { opacity: 1, y: 0, duration: 0.45, stagger: 0.05, ease: "expo.out",
+            onComplete: () => setSwitching(false) }
+        );
+      },
+    });
+    gsap.to(canRef.current, {
+      opacity: 0, scale: 0.9, duration: 0.25, ease: "power2.in",
+      onComplete: () => {
+        gsap.fromTo(canRef.current,
+          { opacity: 0, scale: 0.88, rotate: -12 },
+          { opacity: 1, scale: 1, rotate: -8, duration: 0.9, ease: "expo.out" }
+        );
+      },
+    });
+  };
+
   return (
     <section
-      ref={sectionRef}
-      className="relative w-full h-screen min-h-[700px] overflow-hidden flex items-center"
-      style={{ background: "#0A0A0A" }}
+      ref={secRef}
+      id="experience"
+      style={{
+        position: "relative",
+        width: "100%",
+        height: "100svh",
+        minHeight: "700px",
+        background: "#F5F5F0",
+      }}
     >
-      {/* Animated background gradient */}
-      <div
-        ref={bgRef}
-        className="absolute inset-0 z-0"
-        style={{
-          background:
-            "radial-gradient(ellipse 80% 60% at 60% 50%, rgba(244,0,9,0.18) 0%, rgba(139,0,0,0.08) 40%, transparent 70%)",
-        }}
-      />
+      {/* Entrance overlay */}
+      <div ref={overlayRef} style={{ position: "absolute", inset: 0, zIndex: 30, background: "#F5F5F0", pointerEvents: "none" }} />
 
-      {/* Noise texture overlay */}
-      <div
-        className="absolute inset-0 z-0 opacity-30"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E")`,
-        }}
-      />
-
-      {/* 3D Canvas — right side */}
-      <div className="absolute right-0 top-0 w-full lg:w-[55%] h-full z-10">
-        <HeroScene />
+      {/* "COCA COLA" watermark */}
+      <div style={{
+        position: "absolute", inset: 0, zIndex: 0,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        overflow: "hidden", pointerEvents: "none", gap: "4vw",
+      }}>
+        {["COCA", "COLA"].map((w, i) => (
+          <span key={i} style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(6rem,18vw,20rem)",
+            fontWeight: 900,
+            color: "rgba(10,10,10,0.06)",
+            letterSpacing: "-0.04em",
+            lineHeight: 1,
+            userSelect: "none",
+          }}>{w}</span>
+        ))}
       </div>
 
-      {/* Gradient fade over 3D on left */}
+      {/* Thin horizontal line */}
+      <div style={{
+        position: "absolute", top: "50%", left: 0, right: 0,
+        height: "1px", background: "rgba(10,10,10,0.06)",
+        zIndex: 1, pointerEvents: "none",
+      }} />
+
+      {/* 3D Can */}
       <div
-        className="absolute inset-0 z-10 pointer-events-none"
+        ref={canRef}
         style={{
-          background:
-            "linear-gradient(to right, #0A0A0A 30%, rgba(10,10,10,0.7) 55%, transparent 75%)",
+          position: "absolute",
+          top: "50%", left: "50%",
+          transform: "translate(-50%, -50%) rotate(-8deg)",
+          width: "clamp(240px, 34vw, 500px)",
+          height: "clamp(240px, 34vw, 500px)",
+          zIndex: 5,
+          pointerEvents: "none",
+          opacity: 1,
+          filter: "drop-shadow(8px 16px 40px rgba(0,0,0,0.18))",
+          willChange: "transform",
+          transformOrigin: "center center",
+          overflow: "visible",
         }}
-      />
-
-      {/* Content */}
-      <div
-        ref={headlineRef}
-        className="relative z-20 max-w-[1600px] mx-auto px-8 lg:px-16 w-full"
       >
-        <div className="max-w-[700px]">
-          {/* Eyebrow */}
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-8 h-px bg-[#F40009]" />
-            <span
-              className="text-[#F40009] text-xs font-semibold tracking-[0.3em] uppercase"
-            >
-              Coca-Cola Nigeria
-            </span>
-          </div>
+        <SketchfabEmbed
+          key={`${p.model}-${page}`}
+          modelId={p.model}
+          title="Coca-Cola"
+          className="w-full h-full"
+          autostart transparent
+          ui_infos={false} ui_controls={false}
+          autospin={3} animation_autoplay
+        />
+      </div>
 
-          {/* Main headline */}
-          <div className="overflow-hidden mb-2">
-            <div
-              className="hero-line text-[clamp(4rem,9vw,9rem)] font-black leading-none tracking-tight text-white"
-              style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.04em" }}
-            >
-              Open
-            </div>
-          </div>
-          <div className="overflow-hidden mb-6">
-            <div
-              className="hero-line text-[clamp(4rem,9vw,9rem)] font-black leading-none text-gradient-red"
-              style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.04em" }}
-            >
-              Happiness.
-            </div>
-          </div>
+      {/* Main text layer */}
+      <div
+        className="hero-text-layer"
+        style={{
+          position: "absolute", inset: 0, zIndex: 10,
+          display: "flex", flexDirection: "column",
+          justifyContent: "center",
+          padding: "0 clamp(24px,5vw,72px)",
+          pointerEvents: "none",
+        }}
+      >
+        <div className="h-script" style={{
+          display: "flex", alignItems: "center", gap: "10px",
+          marginBottom: "clamp(4px,0.8vw,10px)", opacity: 0,
+        }}>
+          <div style={{
+            width: "clamp(10px,1.4vw,18px)", height: "clamp(10px,1.4vw,18px)",
+            borderRadius: "50%", background: "#E8001A", flexShrink: 0,
+          }} />
+          <span style={{
+            fontFamily: "var(--font-script)",
+            fontSize: "clamp(1rem,2.2vw,1.8rem)",
+            color: "#0A0A0A", letterSpacing: "-0.01em",
+          }}>
+            {p.script}
+          </span>
+        </div>
 
-          {/* Sub headline */}
-          <div className="overflow-hidden mb-4">
-            <div
-              className="hero-line text-[clamp(1.5rem,3vw,2.8rem)] font-light text-white/50 leading-tight"
-              style={{ letterSpacing: "-0.02em" }}
-            >
-              Recipe for Wonder
-            </div>
-          </div>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 0, lineHeight: 0.82 }}>
+          <h1 className="hw1" style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(5.5rem,15vw,16rem)",
+            fontWeight: 900, color: "#0A0A0A",
+            letterSpacing: "-0.055em", lineHeight: 0.82, margin: 0, opacity: 0,
+          }}>
+            {p.word1}
+          </h1>
 
-          <p
-            ref={subRef}
-            className="text-white/40 text-base lg:text-lg leading-relaxed max-w-[420px] mb-12"
-          >
-            More than a drink. A feeling. A moment. A culture.
-            Nigeria's most iconic brand experience.
+          <div style={{ width: "clamp(180px,26vw,380px)", flexShrink: 0 }} />
+
+          <h1 className="hw2" style={{
+            fontFamily: "var(--font-display)",
+            fontSize: "clamp(5.5rem,15vw,16rem)",
+            fontWeight: 900, color: "transparent",
+            WebkitTextStroke: "2.5px #0A0A0A",
+            letterSpacing: "-0.055em", lineHeight: 0.82, margin: 0, opacity: 0,
+          }}>
+            {p.word2}
+            <sup style={{
+              fontSize: "0.28em", verticalAlign: "super",
+              WebkitTextStroke: "1px #0A0A0A", letterSpacing: 0,
+            }}>®</sup>
+          </h1>
+        </div>
+      </div>
+
+      {/* Bottom bar */}
+      <div style={{
+        position: "absolute", bottom: 0, left: 0, right: 0, zIndex: 20,
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "clamp(12px,2vh,20px) clamp(24px,5vw,72px)",
+        borderTop: "1px solid rgba(10,10,10,0.18)",
+        background: "rgba(0,0,0,0.4)",
+        backdropFilter: "blur(10px)",
+      }}>
+        <div className="h-bottom" style={{ opacity: 0, textAlign: "center" }}>
+          <p style={{ fontSize: "10px", color: "rgba(255,255,255,0.75)", letterSpacing: "0.03em", lineHeight: 1.4 }}>
+            © 2024 The Coca-Cola<br />Company. All rights reserved.
           </p>
+        </div>
 
-          {/* CTAs */}
-          <div ref={ctaRef} className="flex items-center gap-6 flex-wrap">
-            <Link
-              href="/brands"
-              className="group relative flex items-center gap-3 px-8 py-4 text-sm font-bold tracking-widest uppercase overflow-hidden transition-all duration-500 hover:scale-105"
-              style={{ background: "#F40009", color: "white" }}
+        <div className="h-bottom" style={{ opacity: 0, display: "flex", alignItems: "center", gap: "10px" }}>
+          {PAGES.map((pg, n) => (
+            <button
+              key={n}
+              onClick={() => switchPage(n)}
+              data-hover
+              style={{
+                background: "none", border: "none", cursor: "pointer", padding: "2px 4px",
+                fontSize: "12px", fontWeight: page === n ? 700 : 400,
+                color: page === n ? "#0A0A0A" : "rgba(10,10,10,0.8)",
+                transition: "all 0.3s", position: "relative",
+              }}
             >
-              <span className="relative z-10">Explore Experience</span>
-              <svg
-                className="w-4 h-4 relative z-10 transition-transform duration-300 group-hover:translate-x-1"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
-              <div
-                className="absolute inset-0 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-500"
-                style={{ background: "#C0000A" }}
-              />
-            </Link>
-
-            <Link
-              href="/about"
-              className="flex items-center gap-3 text-sm font-semibold tracking-widest uppercase text-white/50 hover:text-white transition-colors duration-300 group"
-            >
-              Our Story
-              <span className="w-8 h-px bg-white/30 group-hover:bg-white group-hover:w-12 transition-all duration-500" />
-            </Link>
-          </div>
+              {pg.num}
+              {n < PAGES.length - 1 && (
+                <span style={{ position: "absolute", right: "-8px", color: "rgba(255,255,255,0.85)", fontWeight: 400 }}>·</span>
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <div
-        ref={scrollIndicatorRef}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-3"
-      >
-        <span className="text-white/30 text-xs tracking-[0.3em] uppercase">Scroll</span>
-        <div className="w-px h-16 bg-gradient-to-b from-white/30 to-transparent relative overflow-hidden">
-          <div
-            className="absolute top-0 left-0 w-full h-1/2 bg-[#F40009]"
-            style={{ animation: "scrollLine 2s ease-in-out infinite" }}
-          />
+      {/* 3D badge */}
+      <div className="h-bottom" style={{
+        position: "absolute",
+        bottom: "clamp(56px,9vh,80px)", left: "50%",
+        transform: "translateX(-50%)",
+        zIndex: 20, opacity: 0,
+      }}>
+        <div
+          data-hover
+          style={{
+            width: "44px", height: "44px", borderRadius: "50%",
+            border: "1.5px solid rgba(10,10,10,0.15)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontSize: "10px", fontWeight: 700, letterSpacing: "0.1em",
+            color: "rgba(255,255,255,0.8)", cursor: "pointer",
+            transition: "border-color 0.3s, color 0.3s",
+            background: "#F5F5F0",
+          }}
+          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.borderColor = "#E8001A"; (e.currentTarget as HTMLElement).style.color = "#E8001A"; }}
+          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.borderColor = "rgba(10,10,10,0.15)"; (e.currentTarget as HTMLElement).style.color = "rgba(10,10,10,0.65)"; }}
+        >
+          3D
         </div>
       </div>
-
-      {/* Bottom stats bar */}
-      <div
-        className="absolute bottom-0 left-0 right-0 z-20 border-t"
-        style={{ borderColor: "rgba(255,255,255,0.06)" }}
-      >
-        <div className="max-w-[1600px] mx-auto px-8 lg:px-16 py-5 flex items-center justify-between">
-          <div className="flex items-center gap-12">
-            {[
-              { value: "130+", label: "Years of Joy" },
-              { value: "200+", label: "Countries" },
-              { value: "1.9B", label: "Daily Servings" },
-            ].map((stat) => (
-              <div key={stat.label} className="hidden sm:block">
-                <div
-                  className="text-xl font-black text-white"
-                  style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}
-                >
-                  {stat.value}
-                </div>
-                <div className="text-white/30 text-xs tracking-widest uppercase mt-0.5">
-                  {stat.label}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="text-white/20 text-xs tracking-widest uppercase">
-            Est. 1886
-          </div>
-        </div>
-      </div>
-
-      <style jsx>{`
-        @keyframes scrollLine {
-          0% { transform: translateY(-100%); }
-          100% { transform: translateY(200%); }
-        }
-      `}</style>
     </section>
   );
 }

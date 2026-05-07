@@ -1,286 +1,180 @@
 "use client";
-
 import { useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-if (typeof window !== "undefined") {
-  gsap.registerPlugin(ScrollTrigger);
-}
+if (typeof window !== "undefined") gsap.registerPlugin(ScrollTrigger);
 
-const campaigns = [
+const news = [
   {
-    id: "01",
-    title: "Taste the Feeling",
-    subtitle: "Nigeria Edition",
-    description:
-      "Every sip tells a story. From Lagos to Abuja, Kano to Port Harcourt — the feeling is universal.",
-    color: "#F40009",
-    accent: "#FF4444",
-    year: "2024",
-    tag: "CAMPAIGN",
+    tag: "CAMPAIGN", date: "2024",
+    title: "Taste the Feeling — Nigeria Edition",
+    desc: "A cinematic celebration of everyday Nigerian moments. Every sip, every feeling.",
+    video: "/media/videos/coke-for-everyone.mp4",
+    color: "#E8001A",
   },
   {
-    id: "02",
-    title: "Share a Coke",
-    subtitle: "With Nigeria",
-    description:
-      "Personalized bottles. Personalized moments. Find your name, share your story.",
-    color: "#C0000A",
-    accent: "#F40009",
-    year: "2024",
-    tag: "ACTIVATION",
+    tag: "ACTIVATION", date: "2024",
+    title: "Share a Coke — Find Your Name",
+    desc: "Personalized bottles featuring the most popular Nigerian names.",
+    video: "/media/videos/coke-share-with.mp4",
+    color: "#C0001A",
   },
   {
-    id: "03",
-    title: "Real Magic",
-    subtitle: "Happens Here",
-    description:
-      "Magic isn't in the extraordinary. It's in the everyday moments that bring us together.",
-    color: "#8B0000",
-    accent: "#C0000A",
-    year: "2023",
-    tag: "BRAND STORY",
+    tag: "BRAND STORY", date: "2023",
+    title: "A Real Coca-Cola Story",
+    desc: "Magic isn't in the extraordinary. It's in the everyday moments.",
+    video: "/media/videos/coke-real-story.mp4",
+    color: "#8B0010",
+  },
+  {
+    tag: "MUSIC", date: "2023",
+    title: "The Taste of Africa",
+    desc: "Nigeria's biggest artists. One studio. Infinite possibilities.",
+    video: "/media/videos/coke-wozzaah.mp4",
+    color: "#E8001A",
   },
 ];
 
 export default function CampaignShowcase() {
-  const sectionRef = useRef<HTMLElement>(null);
+  const secRef  = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
-  const progressRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+  const panelRef  = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      // Section entrance
-      gsap.fromTo(
-        ".campaign-eyebrow",
-        { y: 40, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1,
-          ease: "expo.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 80%",
-          },
-        }
-      );
-
-      gsap.fromTo(
-        ".campaign-headline",
+      gsap.fromTo(".news-title",
         { y: 60, opacity: 0 },
-        {
-          y: 0,
-          opacity: 1,
-          duration: 1.2,
-          ease: "expo.out",
-          scrollTrigger: {
-            trigger: sectionRef.current,
-            start: "top 75%",
-          },
-        }
+        { y: 0, opacity: 1, duration: 1.1, ease: "expo.out",
+          scrollTrigger: { trigger: secRef.current, start: "top 78%" } }
       );
-
-      // Scroll-based campaign switching
-      campaigns.forEach((_, i) => {
-        ScrollTrigger.create({
-          trigger: `.campaign-panel-${i}`,
-          start: "top 60%",
-          end: "bottom 40%",
-          onEnter: () => setActive(i),
-          onEnterBack: () => setActive(i),
-        });
-      });
-    }, sectionRef);
-
+      gsap.fromTo(".news-card",
+        { y: 50, opacity: 0, scale: 0.96 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.8, stagger: 0.12, ease: "expo.out",
+          scrollTrigger: { trigger: ".news-cards", start: "top 78%" } }
+      );
+      gsap.fromTo(".news-video-panel",
+        { clipPath: "inset(0 0 100% 0)" },
+        { clipPath: "inset(0 0 0% 0)", duration: 1.2, ease: "expo.out",
+          scrollTrigger: { trigger: ".news-video-panel", start: "top 80%" } }
+      );
+    }, secRef);
     return () => ctx.revert();
   }, []);
 
   useEffect(() => {
-    if (!contentRef.current) return;
-    gsap.fromTo(
-      contentRef.current.querySelectorAll(".animate-in"),
-      { y: 20, opacity: 0 },
-      { y: 0, opacity: 1, duration: 0.6, stagger: 0.08, ease: "expo.out" }
-    );
+    // Autoplay active video immediately
+    videoRefs.current.forEach((v, i) => {
+      if (!v) return;
+      if (i === active) {
+        v.play().catch(() => {});
+      } else {
+        v.pause();
+        v.currentTime = 0;
+      }
+    });
+    if (panelRef.current) {
+      gsap.fromTo(panelRef.current.querySelectorAll(".panel-item"),
+        { y: 16, opacity: 0 },
+        { y: 0, opacity: 1, duration: 0.45, stagger: 0.06, ease: "expo.out" }
+      );
+    }
   }, [active]);
 
   return (
-    <section
-      ref={sectionRef}
-      className="relative py-32 overflow-hidden"
-      style={{ background: "#0A0A0A" }}
-    >
-      {/* Background accent */}
-      <div
-        className="absolute top-0 left-0 right-0 h-px"
-        style={{ background: "linear-gradient(to right, transparent, rgba(244,0,9,0.4), transparent)" }}
-      />
+    <section ref={secRef} className="relative py-28 overflow-hidden" style={{ background: "#F5F5F0" }}>
+      <div className="divider-white mb-0" />
 
-      <div className="max-w-[1600px] mx-auto px-8 lg:px-16">
+      <div className="max-w-[1440px] mx-auto px-6 lg:px-12 pt-16">
         {/* Header */}
-        <div className="mb-20">
-          <div className="campaign-eyebrow flex items-center gap-3 mb-6">
-            <div className="w-8 h-px bg-[#F40009]" />
-            <span className="text-[#F40009] text-xs font-semibold tracking-[0.3em] uppercase">
-              Campaign Stories
-            </span>
-          </div>
-          <div className="flex items-end justify-between flex-wrap gap-6">
-            <h2
-              className="campaign-headline text-[clamp(3rem,6vw,6rem)] font-black leading-none text-white"
-              style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.04em" }}
-            >
+        <div className="flex items-end justify-between mb-14 flex-wrap gap-4">
+          <div>
+            <div className="news-title section-label mb-4">The Freshest News</div>
+            <h2 className="news-title text-[clamp(2.5rem,5vw,5rem)] font-black leading-none text-[#0A0A0A]"
+              style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.04em" }}>
               Moments That
-              <br />
-              <span className="text-gradient-red">Move Nigeria.</span>
+              <br /><span className="text-red-gradient">Move Nigeria.</span>
             </h2>
-            <p className="text-white/40 max-w-xs text-sm leading-relaxed">
-              Campaigns crafted for the Nigerian spirit — bold, vibrant, and deeply human.
-            </p>
+          </div>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setActive(a => Math.max(0, a - 1))}
+              className="w-10 h-10 rounded-full border border-black/15 flex items-center justify-center text-[#0A0A0A]/50 hover:border-[#F40009] hover:text-[#F40009] transition-all duration-300" data-hover>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <button onClick={() => setActive(a => Math.min(news.length - 1, a + 1))}
+              className="w-10 h-10 rounded-full border border-black/15 flex items-center justify-center text-[#0A0A0A]/50 hover:border-[#F40009] hover:text-[#F40009] transition-all duration-300" data-hover>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+              </svg>
+            </button>
           </div>
         </div>
 
-        {/* Campaign panels */}
-        <div className="grid lg:grid-cols-2 gap-0 lg:gap-16 items-start">
-          {/* Left: Sticky visual */}
-          <div className="hidden lg:block sticky top-32 h-[60vh]">
-            <div
-              className="relative w-full h-full rounded-2xl overflow-hidden transition-all duration-700"
-              style={{ background: campaigns[active].color }}
-            >
-              {/* Animated background pattern */}
-              <div
-                className="absolute inset-0 opacity-20"
-                style={{
-                  backgroundImage: `repeating-linear-gradient(
-                    45deg,
-                    transparent,
-                    transparent 40px,
-                    rgba(255,255,255,0.05) 40px,
-                    rgba(255,255,255,0.05) 41px
-                  )`,
-                }}
-              />
-
-              {/* Campaign number */}
-              <div
-                className="absolute top-8 left-8 text-[8rem] font-black leading-none text-white/10"
-                style={{ fontFamily: "var(--font-display)" }}
-              >
-                {campaigns[active].id}
-              </div>
-
-              {/* Content */}
-              <div ref={contentRef} className="absolute bottom-8 left-8 right-8">
-                <div className="animate-in text-white/60 text-xs tracking-[0.3em] uppercase mb-3">
-                  {campaigns[active].tag} · {campaigns[active].year}
-                </div>
-                <h3
-                  className="animate-in text-4xl font-black text-white leading-tight mb-2"
-                  style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.03em" }}
-                >
-                  {campaigns[active].title}
-                </h3>
-                <p className="animate-in text-white/70 text-sm leading-relaxed">
-                  {campaigns[active].description}
-                </p>
-              </div>
-
-              {/* Glow */}
-              <div
-                className="absolute inset-0 pointer-events-none"
-                style={{
-                  background: `radial-gradient(ellipse at 80% 20%, ${campaigns[active].accent}40 0%, transparent 60%)`,
-                }}
-              />
+        {/* Layout: video left + cards right */}
+        <div className="grid lg:grid-cols-5 gap-6 items-start">
+          {/* Video panel */}
+          <div className="news-video-panel lg:col-span-2 relative rounded-2xl overflow-hidden aspect-[4/5] bg-[#F5F5F0]"
+            style={{ clipPath: "inset(0 0 100% 0)" }}>
+            {news.map((n, i) => (
+              <video key={i} ref={el => { videoRefs.current[i] = el; }}
+                src={n.video} autoPlay muted loop playsInline
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-700"
+                style={{ opacity: active === i ? 1 : 0 }} />
+            ))}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+            <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-bold tracking-widest uppercase"
+              style={{ background: news[active].color, color: "#0A0A0A" }}>
+              {news[active].tag}
             </div>
+            <div ref={panelRef} className="absolute bottom-6 left-6 right-6">
+              <div className="panel-item text-[#0A0A0A]/50 text-[10px] tracking-widest uppercase mb-1">{news[active].date}</div>
+              <div className="panel-item text-[#0A0A0A] text-xl font-black leading-tight" style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}>
+                {news[active].title}
+              </div>
+            </div>
+            <div className="absolute top-4 right-4 w-px h-[calc(100%-32px)]" style={{ background: news[active].color, opacity: 0.4 }} />
           </div>
 
-          {/* Right: Scrollable panels */}
-          <div className="space-y-6">
-            {campaigns.map((campaign, i) => (
-              <div
-                key={campaign.id}
-                className={`campaign-panel-${i} group relative p-8 rounded-2xl cursor-pointer transition-all duration-500 border ${
-                  active === i
-                    ? "border-[#F40009]/40 bg-[#F40009]/08"
-                    : "border-white/06 bg-white/02 hover:border-white/12"
+          {/* News cards */}
+          <div className="news-cards lg:col-span-3 space-y-4">
+            {news.map((n, i) => (
+              <div key={i} onClick={() => setActive(i)}
+                className={`news-card group relative p-5 rounded-xl cursor-pointer transition-all duration-400 border ${
+                  active === i ? "border-[#F40009]/40" : "border-black/06 hover:border-black/12"
                 }`}
-                onClick={() => setActive(i)}
-              >
-                {/* Mobile visual */}
-                <div
-                  className="lg:hidden w-full h-40 rounded-xl mb-6 relative overflow-hidden"
-                  style={{ background: campaign.color }}
-                >
-                  <div
-                    className="absolute bottom-4 left-4 text-5xl font-black text-white/20"
-                    style={{ fontFamily: "var(--font-display)" }}
-                  >
-                    {campaign.id}
-                  </div>
-                </div>
-
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-3 mb-3">
-                      <span
-                        className={`text-xs font-semibold tracking-[0.2em] uppercase transition-colors duration-300 ${
-                          active === i ? "text-[#F40009]" : "text-white/30"
-                        }`}
-                      >
-                        {campaign.tag}
-                      </span>
-                      <span className="text-white/20 text-xs">{campaign.year}</span>
+                style={{ background: active === i ? "rgba(244,0,9,0.05)" : "rgba(10,10,10,0.02)" }}
+                data-hover>
+                <div className="flex gap-4 items-start">
+                  {/* Thumbnail */}
+                  <div className="relative w-20 h-16 rounded-lg overflow-hidden flex-shrink-0">
+                    <video src={n.video} muted playsInline className="absolute inset-0 w-full h-full object-cover" />
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-full flex items-center justify-center" style={{ background: "rgba(0,0,0,0.5)" }}>
+                        <svg className="w-3 h-3 text-[#0A0A0A] ml-0.5" fill="currentColor" viewBox="0 0 24 24">
+                          <path d="M8 5v14l11-7z" />
+                        </svg>
+                      </div>
                     </div>
-                    <h3
-                      className={`text-2xl font-black leading-tight mb-3 transition-colors duration-300 ${
-                        active === i ? "text-white" : "text-white/60"
-                      }`}
-                      style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.02em" }}
-                    >
-                      {campaign.title}
-                      <br />
-                      <span className={active === i ? "text-[#F40009]" : "text-white/30"}>
-                        {campaign.subtitle}
-                      </span>
-                    </h3>
-                    <p
-                      className={`text-sm leading-relaxed transition-all duration-500 ${
-                        active === i ? "text-white/60 max-h-20" : "text-white/30 max-h-0 overflow-hidden lg:max-h-20"
-                      }`}
-                    >
-                      {campaign.description}
-                    </p>
                   </div>
-
-                  <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 transition-all duration-500 ${
-                      active === i ? "bg-[#F40009]" : "bg-white/06"
-                    }`}
-                  >
-                    <svg
-                      className="w-4 h-4 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                    </svg>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="text-[10px] font-bold tracking-widest uppercase" style={{ color: n.color }}>{n.tag}</span>
+                      <span className="text-[#0A0A0A]/50 text-[10px]">{n.date}</span>
+                    </div>
+                    <h4 className="text-sm font-black text-[#0A0A0A] leading-tight mb-1 line-clamp-2"
+                      style={{ fontFamily: "var(--font-display)", letterSpacing: "-0.01em",
+                        color: active === i ? "white" : "rgba(255,255,255,0.65)" }}>
+                      {n.title}
+                    </h4>
+                    <p className="text-[#0A0A0A]/65 text-xs leading-relaxed line-clamp-2">{n.desc}</p>
                   </div>
                 </div>
-
-                {/* Progress bar */}
                 {active === i && (
-                  <div className="mt-6 h-px bg-white/10 relative overflow-hidden">
-                    <div
-                      className="absolute inset-y-0 left-0 bg-[#F40009]"
-                      style={{ animation: "progressBar 5s linear forwards" }}
-                    />
+                  <div className="mt-3 h-px bg-[#F5F5F0]/08 overflow-hidden">
+                    <div className="h-full bg-[#F40009]" style={{ animation: "progressBar 6s linear forwards" }} />
                   </div>
                 )}
               </div>
@@ -288,13 +182,6 @@ export default function CampaignShowcase() {
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes progressBar {
-          from { width: 0%; }
-          to { width: 100%; }
-        }
-      `}</style>
     </section>
   );
 }
